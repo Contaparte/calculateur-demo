@@ -63,14 +63,22 @@
             color: white;
             padding: 15px 30px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 18px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            line-height: 1.2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
-        
+
         .demo-cta:hover {
             background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
         
         h1 { 
@@ -637,10 +645,20 @@
             event.currentTarget.classList.add("active");
         }
 
-        // Afficher le message de démonstration
         function showDemoMessage() {
-            document.getElementById('demoOverlay').classList.add('active');
-        }
+    document.getElementById('demoOverlay').classList.add('active');
+}
+
+        // Action du bouton "Obtenir l'accès complet"
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctaButton = document.querySelector('.demo-cta');
+            if (ctaButton) {
+                ctaButton.addEventListener('click', function() {
+                    // Rediriger vers la page du calculateur sur votre site
+                    window.top.location.href = 'https://plans-architecture.ca/calculateur-de-baies-non-protegees/';
+                });
+            }
+        });
 
         // Fermer l'overlay en cliquant en dehors
         document.getElementById('demoOverlay').addEventListener('click', function(e) {
@@ -721,6 +739,15 @@
                 document.getElementById('spacing_options_91015').style.display = this.checked ? 'block' : 'none';
             });
         });
+        
+// Déclencher le panneau démo avec la touche Entrée
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        showDemoMessage();
+    }
+});
+        
     </script>
 </body>
 </html>
