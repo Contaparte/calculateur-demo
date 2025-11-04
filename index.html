@@ -654,11 +654,11 @@
             const ctaButton = document.querySelector('.demo-cta');
             if (ctaButton) {
                 ctaButton.addEventListener('click', function() {
-                    // Rediriger vers la page du calculateur sur votre site
-                    window.top.location.href = 'https://plans-architecture.ca/calculateur-de-baies-non-protegees/';
+                    // Envoyer un message à la page parente pour déclencher l'achat
+                    window.parent.postMessage('triggerPurchase', '*');
                 });
             }
-        });
+});
 
         // Fermer l'overlay en cliquant en dehors
         document.getElementById('demoOverlay').addEventListener('click', function(e) {
