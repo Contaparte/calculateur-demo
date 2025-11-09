@@ -748,6 +748,30 @@ document.addEventListener('keydown', function(e) {
     }
 });
         
+    <script>
+    // Envoyer la hauteur du contenu au parent
+    function sendHeight() {
+        var height = document.getElementById('app').scrollHeight + 40; // +40 pour marge
+        window.parent.postMessage({height: height}, '*');
+    }
+
+    // Envoyer la hauteur au chargement et quand on change d'onglet
+    window.addEventListener('load', sendHeight);
+
+    // Répondre aux demandes de hauteur
+    window.addEventListener('message', function(e) {
+        if (e.data === 'getHeight') {
+            sendHeight();
+        }
+    });
+
+    // Surveiller les changements d'onglets
+    var tabButtons = document.querySelectorAll('.tab-link');
+    tabButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            setTimeout(sendHeight, 100); // Petit délai pour attendre le changement
+        });
+    });
     </script>
 </body>
 </html>
