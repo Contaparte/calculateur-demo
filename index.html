@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de baies non protégées (CNB) - Démo</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #fef7f2; 
+        }
+        
+        #app { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+            position: relative;
+        }
+        
+        /* Overlay pour la version démo */
+        .demo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 8px;
+        }
+        
+        .demo-overlay.active {
+            display: flex;
+        }
+        
+        .demo-message {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+        
+        .demo-message h2 {
+            color: #004d99;
+            margin-bottom: 20px;
+        }
+        
+        .demo-message p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .demo-cta {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            line-height: 1.2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .demo-cta:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        h1 { 
+            color: #333; 
+            text-align: center; 
+        }
+        
+        .tab-nav { 
+            overflow: hidden; 
+            background-color: #f1f1f1; 
+            border-bottom: 1px solid #ccc; 
+        }
+        
+        .tab-nav button { 
+            background-color: inherit; 
+            color: #333; 
+            float: left; 
+            border: none; 
+            outline: none; 
+            cursor: pointer; 
+            padding: 14px 16px; 
+            transition: 0.3s; 
+            font-size: 16px; 
+        }
+        
+        .tab-nav button:hover { 
+            background-color: #ddd; 
+        }
+        
+        .tab-nav button.active { 
+            background-color: #004d99; 
+            color: white; 
+        }
+        
+        .tab-content { 
+            display: none; 
+            padding: 20px; 
+            border: 1px solid #ccc; 
+            border-top: none; 
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
+        
+        .form-group { 
+            margin-bottom: 15px; 
+        }
+        
+        label { 
+            display: block; 
+            margin: 10px 0; 
+            font-size: 16px; 
+        }
+        
+        input[type="number"], 
+        input[type="text"], 
+        select { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        
+        button { 
+            margin: 10px 0; 
+            padding: 10px 20px; 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            height: 44px; 
+            box-sizing: border-box; 
+            line-height: 1.2; 
+        }
+        
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        
+        .info { 
+            font-style: italic; 
+            font-size: 14px; 
+            color: #666; 
+            margin-top: 5px; 
+        }
+        
+        .tooltip { 
+            position: relative; 
+            display: inline-block; 
+            margin-left: 5px; 
+            vertical-align: top; 
+        }
+        
+        .tooltip .tooltip-icon { 
+            background-color: #aaaaaa; 
+            color: white; 
+            width: 16px; 
+            height: 16px; 
+            border-radius: 50%; 
+            display: inline-block; 
+            text-align: center; 
+            font-size: 11px; 
+            line-height: 16px; 
+            cursor: help; 
+        }
+        
+        .tooltip .tooltip-text { 
+            visibility: hidden; 
+            width: 250px; 
+            background-color: #555; 
+            color: #fff; 
+            text-align: left; 
+            border-radius: 6px; 
+            padding: 8px; 
+            position: absolute; 
+            z-index: 1; 
+            bottom: 125%; 
+            left: 50%; 
+            margin-left: -125px; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+            font-style: normal; 
+            font-size: 13px; 
+        }
+        
+        .tooltip:hover .tooltip-text { 
+            visibility: visible; 
+            opacity: 1; 
+        }
+        
+        .section-title { 
+            background-color: #e9ecef; 
+            padding: 8px 12px; 
+            margin-top: 15px; 
+            border-radius: 4px; 
+        }
+        
+        .spacing-input { 
+            width: calc(50% - 10px); 
+            display: inline-block; 
+        }
+        
+        .spacing-input:first-child { 
+            margin-right: 10px; 
+        }
+        
+        .metric-input, 
+        .imperial-input { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        
+        .imperial-input { 
+            display: none; 
+        }
+        
+        .unit-label .tooltip { 
+            display: inline-block !important; 
+        }
+        
+        input.metric-input::-webkit-inner-spin-button,
+        input.metric-input::-webkit-outer-spin-button,
+        input.imperial-input::-webkit-inner-spin-button,
+        input.imperial-input::-webkit-outer-spin-button {
+            opacity: 1 !important;
+            height: auto !important;
+            appearance: auto !important;
+            -webkit-appearance: auto !important;
+            margin-left: 4px;
+        }
+        
+        /* Badge démo */
+        .demo-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #ff6b6b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="demo-badge">VERSION DÉMO</div>
+        
+        <div class="demo-overlay" id="demoOverlay">
+            <div class="demo-message">
+                <h2>🔒 Fonctionnalité Premium</h2>
+                <p>Les calculs sont disponibles uniquement dans la version complète. Obtenez un accès illimité pour utiliser toutes les fonctionnalités du calculateur.</p>
+                <button class="demo-cta" onclick="window.location.href='#upgrade'">Obtenir l'accès complet</button>
+            </div>
+        </div>
+        
+        <h1>Calculateur de baies non protégées (CNB)</h1>
+        
+        <div class="form-group">
+            <label for="measurementSystem">Système de mesure :</label>
+            <select id="measurementSystem">
+                <option value="metric">Métrique (mm)</option>
+                <option value="imperial">Impérial (pieds-pouces)</option>
+            </select>
+        </div>
+        
+        <div class="tab-nav">
+            <button class="tab-link active" onclick="openTab(event, 'cnb')">Méthode 3.2.3.</button>
+            <button class="tab-link" onclick="openTab(event, 'method91014')">Méthode 9.10.14.</button>
+            <button class="tab-link" onclick="openTab(event, 'method91015')">Méthode 9.10.15.</button>
+        </div>
+
+        <!-- Onglet CNB (3.2.3) -->
+        <div id="cnb" class="tab-content active">
+            <p>Calcul basé sur la section 3.2.3 du CNB</p>
+            
+            <div class="form-group">
+                <label for="usage_cnb">Usage du bâtiment 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Les usages sont classés par groupe selon leur risque d'incendie. Les groupes A, B3, C, D et F3 sont généralement à risque moindre que les groupes E, F1 et F2.</span>
+                    </div>
+                </label>
+                <select id="usage_cnb">
+                    <option value="groupes_A_B3_C_D_F3">Usages des groupes A, B division 3, C, D et F division 3</option>
+                    <option value="groupes_E_F1_F2">Usages des groupes E et F divisions 1 et 2</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="construction_type_cnb">Type de construction 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 3.2.3.7, le type de construction a un impact sur les exigences. La construction incombustible offre généralement une meilleure résistance au feu.</span>
+                    </div>
+                </label>
+                <select id="construction_type_cnb">
+                    <option value="incombustible">Incombustible</option>
+                    <option value="combustible">Combustible</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="revetement_type_cnb">Type de revêtement 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Le revêtement influe sur la propagation potentielle du feu. Les revêtements incombustibles offrent une meilleure protection.</span>
+                    </div>
+                </label>
+                <select id="revetement_type_cnb">
+                    <option value="incombustible">Incombustible</option>
+                    <option value="combustible">Combustible</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Protection par gicleurs 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Si le bâtiment est protégé partiellement par gicleurs avec au moins un étage non protégé, vous devrez appliquer les conditions spécifiques selon l'article 3.2.3.1. 8).</span>
+                    </div>
+                </label>
+                <select id="sprinklers_cnb">
+                    <option value="none">Aucune protection par gicleurs</option>
+                    <option value="complete">Bâtiment entièrement protégé par gicleurs</option>
+                    <option value="partial">Protection partielle par gicleurs (certains étages non protégés)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance_cnb" class="unit-label">Distance limitative (m) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Distance entre la façade de rayonnement et la limite de propriété, l'axe d'une voie publique ou une ligne imaginaire entre deux bâtiments sur le même terrain.</span>
+                    </div>
+                </label>
+                <input type="number" id="distance_cnb" class="metric-input" placeholder="Ex: 3,0" min="0" step="0.1">
+                <input type="text" id="distance_cnb_imperial" class="imperial-input" placeholder="Ex: 10'-0"">
+            </div>
+            
+            <div class="form-group">
+                <label for="surface_cnb" class="unit-label">Surface de la façade de rayonnement (m²) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Surface totale de la façade extérieure du mur orientée dans une même direction, mesurée à partir du niveau du sol jusqu'au plafond du dernier étage.</span>
+                    </div>
+                </label>
+                <input type="number" id="surface_cnb" class="metric-input" placeholder="Ex: 100" min="0">
+                <input type="text" id="surface_cnb_imperial" class="imperial-input" placeholder="Ex: 1000 pi²">
+            </div>
+            
+            <div class="section-title">Espacement des baies non protégées</div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_spacing_cnb"> 
+                    Vérifier l'espacement minimal des baies 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 3.2.3.15, les baies non protégées doivent respecter un espacement minimal pour limiter la propagation du feu.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="spacing_options_cnb" style="display: none;">
+                <div class="form-group">
+                    <div class="spacing-input">
+                        <label for="horizontal_spacing_cnb" class="unit-label">Espacement horizontal (m)</label>
+                        <input type="number" id="horizontal_spacing_cnb" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="horizontal_spacing_cnb_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                    <div class="spacing-input">
+                        <label for="vertical_spacing_cnb" class="unit-label">Espacement vertical (m)</label>
+                        <input type="number" id="vertical_spacing_cnb" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="vertical_spacing_cnb_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">Protection des soffites</div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_soffit_cnb"> 
+                    Vérifier la protection des soffites 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 3.2.3.16, les soffites faisant saillie près de la limite de propriété doivent respecter des exigences spécifiques.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="soffit_options_cnb" style="display: none;">
+                <div class="form-group">
+                    <label for="soffit_distance_cnb" class="unit-label">Distance entre le soffite et la limite de propriété (m)</label>
+                    <input type="number" id="soffit_distance_cnb" class="metric-input" value="0.5" min="0" step="0.1" placeholder="Ex: 0,5">
+                    <input type="text" id="soffit_distance_cnb_imperial" class="imperial-input" placeholder="Ex: 1'-8"" value="1'-8"">
+                </div>
+            </div>
+            
+            <button onclick="showDemoMessage()">Calculer</button>
+        </div>
+
+        <!-- Onglet 9.10.14 -->
+        <div id="method91014" class="tab-content">
+            <p>Calcul basé sur la section 9.10.14 du CNB</p>
+            
+            <div class="form-group">
+                <label for="housing_type_91014">Type d'habitation 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.14.1., les maisons comportant un logement accessoire suivent des règles spécifiques.</span>
+                    </div>
+                </label>
+                <select id="housing_type_91014">
+                    <option value="standard">Habitation standard</option>
+                    <option value="accessoire">Maison comportant un logement accessoire</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance_91014" class="unit-label">Distance limitative (m) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Distance entre la façade de rayonnement et la limite de propriété, l'axe d'une voie publique ou une ligne imaginaire entre deux bâtiments sur le même terrain.</span>
+                    </div>
+                </label>
+                <input type="number" id="distance_91014" class="metric-input" placeholder="Ex: 3,0" min="0" step="0.1">
+                <input type="text" id="distance_91014_imperial" class="imperial-input" placeholder="Ex: 10'-0"">
+            </div>
+            
+            <div class="form-group">
+                <label for="surface_91014" class="unit-label">Surface de la façade de rayonnement (m²) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Surface totale de la façade extérieure du mur orientée dans une même direction, mesurée à partir du niveau du sol jusqu'au plafond du dernier étage.</span>
+                    </div>
+                </label>
+                <input type="number" id="surface_91014" class="metric-input" placeholder="Ex: 100" min="0">
+                <input type="text" id="surface_91014_imperial" class="imperial-input" placeholder="Ex: 1000 pi²">
+            </div>
+            
+            <div class="form-group">
+                <label>Protection par gicleurs 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Un bâtiment protégé par gicleurs peut bénéficier d'exigences moins strictes.</span>
+                    </div>
+                </label>
+                <select id="sprinklers_91014">
+                    <option value="none">Aucune protection par gicleurs</option>
+                    <option value="complete">Bâtiment entièrement protégé par gicleurs</option>
+                </select>
+            </div>
+            
+            <div class="section-title">Espacement des baies non protégées</div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_spacing_91014"> 
+                    Vérifier l'espacement minimal des baies 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.14.4.(4), les baies vitrées doivent respecter un espacement minimal si elles desservent une même pièce ou un même espace.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="spacing_options_91014" style="display: none;">
+                <div class="form-group">
+                    <div class="spacing-input">
+                        <label for="horizontal_spacing_91014" class="unit-label">Espacement horizontal (m)</label>
+                        <input type="number" id="horizontal_spacing_91014" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="horizontal_spacing_91014_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                    <div class="spacing-input">
+                        <label for="vertical_spacing_91014" class="unit-label">Espacement vertical (m)</label>
+                        <input type="number" id="vertical_spacing_91014" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="vertical_spacing_91014_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="showDemoMessage()">Calculer</button>
+        </div>
+
+        <!-- Onglet 9.10.15 -->
+        <div id="method91015" class="tab-content">
+            <p>Calcul basé sur la section 9.10.15 du CNB</p>
+            
+            <div class="form-group">
+                <label for="housing_type_91015">Type d'habitation 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.15.1., les maisons comportant un logement accessoire suivent des règles spécifiques.</span>
+                    </div>
+                </label>
+                <select id="housing_type_91015">
+                    <option value="standard">Habitation standard</option>
+                    <option value="accessoire">Maison comportant un logement accessoire</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance_91015" class="unit-label">Distance limitative (m) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Distance entre la façade de rayonnement et la limite de propriété, l'axe d'une voie publique ou une ligne imaginaire entre deux bâtiments sur le même terrain.</span>
+                    </div>
+                </label>
+                <input type="number" id="distance_91015" class="metric-input" placeholder="Ex: 3,0" min="0" step="0.1">
+                <input type="text" id="distance_91015_imperial" class="imperial-input" placeholder="Ex: 10'-0"">
+            </div>
+            
+            <div class="form-group">
+                <label for="surface_91015" class="unit-label">Surface de la façade de rayonnement (m²) 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Surface totale de la façade extérieure du mur orientée dans une même direction, mesurée à partir du niveau du sol jusqu'au plafond du dernier étage.</span>
+                    </div>
+                </label>
+                <input type="number" id="surface_91015" class="metric-input" placeholder="Ex: 100" min="0">
+                <input type="text" id="surface_91015_imperial" class="imperial-input" placeholder="Ex: 1000 pi²">
+            </div>
+            
+            <div class="form-group">
+                <label for="reveting_type_91015">Type de revêtement extérieur 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.15.5, le type de revêtement a un impact sur les exigences de construction, particulièrement pour les distances limitatives faibles.</span>
+                    </div>
+                </label>
+                <select id="reveting_type_91015">
+                    <option value="combustible">Combustible</option>
+                    <option value="incombustible">Incombustible</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Protection par gicleurs 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Un bâtiment protégé par gicleurs peut bénéficier d'exigences moins strictes.</span>
+                    </div>
+                </label>
+                <select id="sprinklers_91015">
+                    <option value="none">Aucune protection par gicleurs</option>
+                    <option value="complete">Bâtiment entièrement protégé par gicleurs</option>
+                </select>
+            </div>
+            
+            <div class="section-title">Protection des soffites</div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_soffit_91015"> 
+                    Vérifier la protection des soffites 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.15.5.(8-12), les soffites faisant saillie près de la limite de propriété doivent respecter des exigences spécifiques.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="soffit_options_91015" style="display: none;">
+                <div class="form-group">
+                    <label for="soffit_distance_91015" class="unit-label">Distance entre le soffite et la limite de propriété (m)</label>
+                    <input type="number" id="soffit_distance_91015" class="metric-input" value="0.5" min="0" step="0.1" placeholder="Ex: 0,5">
+                    <input type="text" id="soffit_distance_91015_imperial" class="imperial-input" placeholder="Ex: 1'-8"" value="1'-8"">
+                </div>
+            </div>
+            
+            <div class="section-title">Espacement des baies non protégées</div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="check_spacing_91015"> 
+                    Vérifier l'espacement minimal des baies 
+                    <div class="tooltip">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">Selon 9.10.15.4.(4), les baies vitrées doivent respecter un espacement minimal si elles desservent une même pièce ou un même espace.</span>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="spacing_options_91015" style="display: none;">
+                <div class="form-group">
+                    <div class="spacing-input">
+                        <label for="horizontal_spacing_91015" class="unit-label">Espacement horizontal (m)</label>
+                        <input type="number" id="horizontal_spacing_91015" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="horizontal_spacing_91015_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                    <div class="spacing-input">
+                        <label for="vertical_spacing_91015" class="unit-label">Espacement vertical (m)</label>
+                        <input type="number" id="vertical_spacing_91015" class="metric-input" value="2" min="0" step="0.1" placeholder="Ex: 2,0">
+                        <input type="text" id="vertical_spacing_91015_imperial" class="imperial-input" placeholder="Ex: 6'-6"" value="6'-6"">
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="showDemoMessage()">Calculer</button>
+        </div>
+    </div>
+
+    <script>
+        // Gestion des onglets
+        function openTab(event, tabName) {
+            const tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            const tablinks = document.getElementsByClassName("tab-link");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            event.currentTarget.classList.add("active");
+        }
+
+        function showDemoMessage() {
+    document.getElementById('demoOverlay').classList.add('active');
+}
+
+        // Action du bouton "Obtenir l'accès complet"
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctaButton = document.querySelector('.demo-cta');
+            if (ctaButton) {
+                ctaButton.addEventListener('click', function() {
+                    // Envoyer un message à la page parente pour déclencher l'achat
+                    window.parent.postMessage('triggerPurchase', '*');
+                });
+            }
+        });
+
+        // Fermer l'overlay en cliquant en dehors
+        document.getElementById('demoOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Gestion du changement de système de mesure
+        document.getElementById('measurementSystem').addEventListener('change', function() {
+            const isImperial = this.value === 'imperial';
+            toggleMeasurementSystem(isImperial);
+            updateUnitLabels(isImperial);
+        });
+
+        function toggleMeasurementSystem(isImperial) {
+            const metricInputs = document.querySelectorAll('.metric-input');
+            const imperialInputs = document.querySelectorAll('.imperial-input');
+            
+            metricInputs.forEach(input => {
+                input.style.display = isImperial ? 'none' : 'block';
+            });
+            
+            imperialInputs.forEach(input => {
+                input.style.display = isImperial ? 'block' : 'none';
+            });
+        }
+
+        function updateUnitLabels(isImperial) {
+            const unitLabels = document.querySelectorAll('.unit-label');
+            
+            unitLabels.forEach(label => {
+                const textNodes = Array.from(label.childNodes).filter(node => node.nodeType === 3);
+                if (textNodes.length > 0) {
+                    let labelText = textNodes[0].nodeValue;
+                    
+                    if (isImperial) {
+                        if (labelText.includes('(m)')) {
+                            labelText = labelText.replace('(m)', '(pi)');
+                        } else if (labelText.includes('(m²)')) {
+                            labelText = labelText.replace('(m²)', '(pi²)');
+                        }
+                    } else {
+                        if (labelText.includes('(pi)')) {
+                            labelText = labelText.replace('(pi)', '(m)');
+                        } else if (labelText.includes('(pi²)')) {
+                            labelText = labelText.replace('(pi²)', '(m²)');
+                        }
+                    }
+                    
+                    textNodes[0].nodeValue = labelText;
+                }
+            });
+        }
+
+        // Gestion des checkboxes pour afficher/masquer les options
+        document.addEventListener('DOMContentLoaded', function() {
+            // CNB
+            document.getElementById('check_spacing_cnb').addEventListener('change', function() {
+                document.getElementById('spacing_options_cnb').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('check_soffit_cnb').addEventListener('change', function() {
+                document.getElementById('soffit_options_cnb').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // 9.10.14
+            document.getElementById('check_spacing_91014').addEventListener('change', function() {
+                document.getElementById('spacing_options_91014').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // 9.10.15
+            document.getElementById('check_soffit_91015').addEventListener('change', function() {
+                document.getElementById('soffit_options_91015').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('check_spacing_91015').addEventListener('change', function() {
+                document.getElementById('spacing_options_91015').style.display = this.checked ? 'block' : 'none';
+            });
+        });
+        
+// Déclencher le panneau démo avec la touche Entrée
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        showDemoMessage();
+    }
+});
+        
+    </script>
+</body>
+</html>
